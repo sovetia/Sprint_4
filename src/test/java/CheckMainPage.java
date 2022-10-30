@@ -1,10 +1,10 @@
 import pom.MainPage;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -12,40 +12,15 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
 @RunWith(Parameterized.class)
-public class CheckSectionQuestions {
+public class CheckMainPage {
     private WebDriver driver;
-    private final int defaultTimeOut = 60;
+    private final int defaultTimeOut = 30;
     private final int questionNumber;
     private final String expectedText;
 
-    public CheckSectionQuestions(int questionNumber, String expectedText) {
+    public CheckMainPage(int questionNumber, String expectedText) {
         this.questionNumber = questionNumber;
         this.expectedText = expectedText;
-    }
-
-    @Before
-    public void startUp() {
-        String br = System.getenv("browser");
-        if ("chrome".equals(br)) {
-            ChromeOptions chromeOptions = new ChromeOptions();
-            chromeOptions.addArguments("--no-sandbox", "--headless", "--disable-dev-shm-usage");
-            driver = new ChromeDriver(chromeOptions);
-        } else if ("ff".equals(br)) {
-            FirefoxOptions firefoxOptions = new FirefoxOptions();
-            firefoxOptions.setHeadless(true);
-            firefoxOptions.setAcceptInsecureCerts(false);
-            driver = new FirefoxDriver(firefoxOptions);
-        } else {
-            ChromeOptions chromeOptions = new ChromeOptions();
-            chromeOptions.addArguments("--no-sandbox", "--headless", "--disable-dev-shm-usage");
-            driver = new ChromeDriver(chromeOptions);
-        }
-        driver.get("https://qa-scooter.praktikum-services.ru/");
-    }
-
-    @After
-    public void teardown() {
-        driver.quit();
     }
 
     @Parameterized.Parameters
@@ -62,6 +37,22 @@ public class CheckSectionQuestions {
         };
     }
 
+    @Before
+    public void startUp() {
+        String br = System.getenv("browser");
+        if ("ff".equals(br)) {
+            FirefoxOptions firefoxOptions = new FirefoxOptions();
+            firefoxOptions.setHeadless(true);
+            firefoxOptions.setAcceptInsecureCerts(false);
+            driver = new FirefoxDriver(firefoxOptions);
+        } else {
+            ChromeOptions chromeOptions = new ChromeOptions();
+            //chromeOptions.addArguments("--no-sandbox", "--headless", "--disable-dev-shm-usage");
+            driver = new ChromeDriver(chromeOptions);
+        }
+        driver.get(MainPage.URL);
+    }
+
     @Test
     public void importantQuestionsTest() {
         MainPage mainPage = new MainPage(driver);
@@ -72,5 +63,10 @@ public class CheckSectionQuestions {
         mainPage.waitForLoadAnswer(defaultTimeOut, questionNumber);
         String actualText = mainPage.getAnswer(questionNumber);
         Assert.assertEquals(expectedText, actualText);
+    }
+
+    @After
+    public void driverQuit() {
+        driver.quit();
     }
 }

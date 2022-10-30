@@ -15,7 +15,7 @@ import pom.OrderPage;
 import java.time.Duration;
 
 @RunWith(Parameterized.class)
-public class TestOrderPage {
+public class CheckOrderPage {
     private final String orderButton;
     private final String firstName;
     private final String lastName;
@@ -30,7 +30,7 @@ public class TestOrderPage {
     private final int defaultTimeOut = 60;
     private final String successfulOrderText = "Заказ оформлен";
 
-    public TestOrderPage(String orderButton, String firstName, String lastName, String address, String metro, String phone, String whereToBringScooter, String rentalPeriod, String scooterColor, String comments) {
+    public CheckOrderPage(String orderButton, String firstName, String lastName, String address, String metro, String phone, String whereToBringScooter, String rentalPeriod, String scooterColor, String comments) {
         this.orderButton = orderButton;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -43,39 +43,33 @@ public class TestOrderPage {
         this.comments = comments;
     }
 
+    @Parameterized.Parameters
+    public static Object[][] getPersonData() {
+        return new Object[][]{
+                {"up", "Кошка", "Сирота", "Котманду", "Котельники", "89000000000", "31.10.2022", "сутки", "black", "Самокаты котам!"},
+                {"down", "Полиграф", "Шариков", "Обухов переулок, 1, квартира 12", "Кропоткинская", "+79000000000", "01.01.2023", "двое суток", "grey", "Самокаты псам!"}
+        };
+    }
+
     @Before
     public void startUp() {
         String br = System.getenv("browser");
-        if ("chrome".equals(br)) {
-            ChromeOptions chromeOptions = new ChromeOptions();
-            chromeOptions.addArguments("--no-sandbox", "--headless", "--disable-dev-shm-usage");
-            driver = new ChromeDriver(chromeOptions);
-        } else if ("ff".equals(br)) {
+        // проверка в браузере Mozilla Firefox
+        if ("ff".equals(br)) {
             FirefoxOptions firefoxOptions = new FirefoxOptions();
             firefoxOptions.setHeadless(true);
             firefoxOptions.setAcceptInsecureCerts(false);
             driver = new FirefoxDriver(firefoxOptions);
-        } else {
+        }
+        // проверка в браузере Google Chrome
+        else {
             ChromeOptions chromeOptions = new ChromeOptions();
-            chromeOptions.addArguments("--no-sandbox", "--headless", "--disable-dev-shm-usage");
+            //chromeOptions.addArguments("--no-sandbox", "--headless", "--disable-dev-shm-usage");
             driver = new ChromeDriver(chromeOptions);
         }
+
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(defaultTimeOut));
-        driver.get("https://qa-scooter.praktikum-services.ru/");
-    }
-
-    @After
-    public void teardown() {
-        driver.quit();
-    }
-
-    @Parameterized.Parameters
-    public static Object[][] getPersonData() {
-        return new Object[][]{
-                {"up", "Иван", "Крокодилов", "Ул.Мира 55", "Черкизовская", "89652315465", "29.10.2022", "сутки", "black", "Спасибо!"},
-                {"down", "Людмила", "Чеснокова", "Ул.Ленина 14", "Теплый стан", "89052664415", "01.11.2022", "двое суток", "grey", "Спасибо!"},
-                {"up", "Алексей", "Воронин", "Ул.Вишневая 98", "Сокольники", "89982323313", "03.11.2022", "семеро суток", null, "Вход со двора"}
-        };
+        driver.get(MainPage.URL);
     }
 
     @Test
@@ -94,5 +88,10 @@ public class TestOrderPage {
 
         String actualText = orderPage.getOrderModalHeaderText();
         Assert.assertTrue(actualText.contains(successfulOrderText));
+    }
+
+    @After
+    public void driverQuit() {
+        driver.quit();
     }
 }
